@@ -1,0 +1,21 @@
+name: richspot-bootstrap-public-tools
+on:
+  push:
+    branches: [richspot-h06h06-native-apk-build-20261005]
+  workflow_dispatch:
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download D8
+        run: |
+          set -euxo pipefail
+          mkdir -p out
+          curl -L --fail --retry 3 -o out/d8.jar https://raw.githubusercontent.com/is-a-minkey/D8.jar-compiler/main/d8.jar
+          sha256sum out/d8.jar | tee out/SHA256SUMS.txt
+          java -cp out/d8.jar com.android.tools.r8.D8 --version | tee out/D8_VERSION.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: richspot-public-android-build-tools
+          path: out/
+          retention-days: 1
