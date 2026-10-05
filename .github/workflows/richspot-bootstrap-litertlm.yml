@@ -1,0 +1,32 @@
+name: richspot-bootstrap-litertlm
+on:
+  push:
+    branches: [richspot-h06h06-native-apk-build-20261005]
+  workflow_dispatch:
+jobs:
+  deps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve public LiteRT-LM Android runtime
+        run: |
+          set -euxo pipefail
+          mkdir -p resolver out/deps
+          cat > resolver/settings.gradle <<'EOF'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
+          rootProject.name='resolver'
+          EOF
+          cat > resolver/build.gradle <<'EOF'
+          configurations { runtimeDeps }
+          dependencies { runtimeDeps 'com.google.ai.edge.litertlm:litertlm-android:0.17.1' }
+          tasks.register('copyRuntimeDeps', Copy) { from configurations.runtimeDeps; into '../out/deps' }
+          EOF
+          cd resolver
+          gradle --no-daemon copyRuntimeDeps
+          cd ..
+          find out/deps -type f -maxdepth 1 -print0 | sort -z | xargs -0 sha256sum > out/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: richspot-public-litertlm-runtime
+          path: out/
+          retention-days: 1
