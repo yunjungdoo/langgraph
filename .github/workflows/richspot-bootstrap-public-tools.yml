@@ -7,13 +7,14 @@ jobs:
   bootstrap:
     runs-on: ubuntu-latest
     steps:
-      - name: Download D8
+      - name: Collect public Android compile inputs
         run: |
           set -euxo pipefail
           mkdir -p out
+          cp "$ANDROID_HOME/platforms/android-35/android.jar" out/android-35.jar
           curl -L --fail --retry 3 -o out/d8.jar https://raw.githubusercontent.com/is-a-minkey/D8.jar-compiler/main/d8.jar
-          sha256sum out/d8.jar | tee out/SHA256SUMS.txt
           java -cp out/d8.jar com.android.tools.r8.D8 --version | tee out/D8_VERSION.txt
+          sha256sum out/* | tee out/SHA256SUMS.txt
       - uses: actions/upload-artifact@v4
         with:
           name: richspot-public-android-build-tools
