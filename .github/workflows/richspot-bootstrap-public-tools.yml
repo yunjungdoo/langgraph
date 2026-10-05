@@ -12,11 +12,11 @@ jobs:
           set -euxo pipefail
           mkdir -p out
           cp "$ANDROID_HOME/platforms/android-35/android.jar" out/android-35.jar
-          curl -L --fail --retry 3 -o out/d8.jar https://raw.githubusercontent.com/is-a-minkey/D8.jar-compiler/main/d8.jar
-          java -cp out/d8.jar com.android.tools.r8.D8 --version | tee out/D8_VERSION.txt
+          curl -L --fail --retry 3 -o out/r8.jar https://dl.google.com/dl/android/maven2/com/android/tools/r8/8.6.27/r8-8.6.27.jar
+          java -cp out/r8.jar com.android.tools.r8.D8 --version | tee out/D8_VERSION.txt
           sha256sum out/* | tee out/SHA256SUMS.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: richspot-public-android-build-tools
+          name: richspot-public-android-build-tools-modern
           path: out/
           retention-days: 1
